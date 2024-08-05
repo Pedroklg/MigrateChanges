@@ -14,8 +14,6 @@ Comando de Execução
 
 Execute o programa com o seguinte comando:
 
-bash
-Copiar código
 .\MoverDif.exe <diretórioDestino> <caminhoDoArquivoDeLog> [níveisParaPular]
 Onde:
 
@@ -26,8 +24,6 @@ Exemplo:
 
 Para mover arquivos modificados para D:\Backup, usando C:\Logs\log.json como o arquivo de log e ignorando 1 nível de diretório, use:
 
-bash
-Copiar código
 .\MoverDif.exe "D:\Backup" "C:\Logs\log.json" 1
 Parar a Execução
 
