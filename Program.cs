@@ -8,12 +8,18 @@ namespace FileCopyFromLog
 {
     class Program
     {
-        static string sourceBasePath = @"C:\Users\pedro_silva\Desktop\PastaFrom"; // Ajuste conforme necessário
-        static string destinationBasePath = @"\\backup\path"; // Ajuste conforme necessário
-        static string logFilePath = @"C:\Users\pedro_silva\Desktop\LogsPastaP\events.json"; // Ajuste conforme necessário
-
         static void Main(string[] args)
         {
+            if (args.Length < 2)
+            {
+                Console.WriteLine("Usage: FileCopyFromLog.exe <destinationBasePath> <logFilePath> [levelsToSkip]");
+                return;
+            }
+
+            string destinationBasePath = args[0];
+            string logFilePath = args[1];
+            int levelsToSkip = args.Length > 2 ? int.Parse(args[2]) : 0;
+
             try
             {
                 // Read the log file
@@ -25,9 +31,8 @@ namespace FileCopyFromLog
                     // Process each log entry
                     foreach (var logEntry in logEntries)
                     {
-                        string relativePath = Path.GetRelativePath(sourceBasePath, logEntry.FullPath);
-                        string sourcePath = Path.Combine(sourceBasePath, relativePath);
-                        string destinationPath = Path.Combine(destinationBasePath, relativePath);
+                        string sourcePath = logEntry.FullPath;
+                        string destinationPath = Path.Combine(destinationBasePath, GetRelativePath(sourcePath, levelsToSkip));
 
                         if (logEntry.ChangeType == "Created" || logEntry.ChangeType == "Changed")
                         {
@@ -46,6 +51,25 @@ namespace FileCopyFromLog
                             {
                                 File.Delete(destinationPath);
                                 Console.WriteLine($"Deleted: {destinationPath}");
+                            }
+                        }
+                        else if (logEntry.ChangeType == "Renamed" && logEntry.OldFullPath != null)
+                        {
+                            string oldDestinationPath = Path.Combine(destinationBasePath, GetRelativePath(logEntry.OldFullPath, levelsToSkip));
+
+                            // Delete the old file in the destination directory
+                            if (File.Exists(oldDestinationPath))
+                            {
+                                File.Delete(oldDestinationPath);
+                                Console.WriteLine($"Deleted (old path): {oldDestinationPath}");
+                            }
+
+                            // Ensure the new path directory exists and copy the file
+                            string? newDestinationDirectory = Path.GetDirectoryName(destinationPath);
+                            if (newDestinationDirectory != null)
+                            {
+                                Directory.CreateDirectory(newDestinationDirectory);
+                                RunRobocopy(sourcePath, destinationPath);
                             }
                         }
                     }
@@ -77,7 +101,7 @@ namespace FileCopyFromLog
             ProcessStartInfo psi = new ProcessStartInfo
             {
                 FileName = "robocopy",
-                Arguments = $"\"{Path.GetDirectoryName(source)}\" \"{Path.GetDirectoryName(destination)}\" \"{Path.GetFileName(source)}\" /COPYALL /Z /MIR",
+                Arguments = $"\"{Path.GetDirectoryName(source)}\" \"{destinationDirectory}\" \"{Path.GetFileName(source)}\" /COPYALL /E /PURGE /Z",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
@@ -97,6 +121,19 @@ namespace FileCopyFromLog
                     Console.WriteLine("Failed to start robocopy process.");
                 }
             }
+        }
+
+        private static string GetRelativePath(string fullPath, int levelsToSkip)
+        {
+            // This function removes the specified number of initial parts of the network path to get the relative path
+            var parts = fullPath.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            if (levelsToSkip >= parts.Length)
+            {
+                // If levelsToSkip is greater than or equal to the number of path segments, return the last segment
+                return Path.Combine(parts[^1]);
+            }
+            // Skip the specified number of levels and return the remaining path
+            return Path.Combine(parts[levelsToSkip..]);
         }
     }
 

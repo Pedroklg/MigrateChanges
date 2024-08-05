@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "Q/kV4P9oihg=",
+  "dgSpecHash": "YA4524iD7sQ=",
   "success": true,
   "projectFilePath": "C:\\Users\\pedro_silva\\Desktop\\Codes\\MigrateChanges\\MigrateChanges.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\pedro_silva\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.7\\microsoft.netcore.app.runtime.win-x64.8.0.7.nupkg.sha512",
+    "C:\\Users\\pedro_silva\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.7\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.7.nupkg.sha512",
+    "C:\\Users\\pedro_silva\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.7\\microsoft.aspnetcore.app.runtime.win-x64.8.0.7.nupkg.sha512"
+  ],
   "logs": []
 }
